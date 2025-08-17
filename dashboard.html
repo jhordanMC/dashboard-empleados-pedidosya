@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atención al Cliente - PedidosYa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="ciro.jpg">
+  <link rel="apple-touch-icon" href="ciro.jpg">
+</head>
+<body class="bg-gray-100 font-sans">
+  <header class="bg-red-600 text-white py-6 flex items-center justify-between">
+    <div class="container mx-auto flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-3xl font-bold mb-2">Atención al Cliente - PedidosYa</h1>
+        <p class="mb-2">Scripts y guías para consultas y reclamos frecuentes</p>
+        <p class="text-sm" id="worker-email">Sesión iniciada como: Cargando...</p>
+      </div>
+    </div>
+    <div class="relative mr-6">
+      <button id="user-menu-button" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-800 hover:bg-gray-400 focus:outline-none">
+        <span id="user-initials"></span>
+      </button>
+      <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-10">
+        <a href="#" id="logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Cerrar sesión</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto py-8">
+    <!-- Sección intermedia para los botones -->
+    <div class="mb-8 bg-white p-6 rounded-lg shadow-md flex justify-center space-x-4">
+      <button onclick="saveTemplatesToFile()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Guardar Templates en TXT</button>
+      <label for="load-templates-input" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer">Cargar Templates</label>
+      <input type="file" id="load-templates-input" accept=".txt" class="hidden" onchange="loadTemplatesFromFile(event)">
+      <button onclick="addSection()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" alt="Añadir sección" class="w-5 h-5 mr-2"> Añadir Sección
+      </button>
+    </div>
+
+    <!-- Sección de Bienvenida -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Bienvenida</h2>
+      <p class="text-gray-700">Utiliza este script para iniciar la conversación con el cliente de manera amable y profesional:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-bienvenida" contenteditable="false">¡Hola! Bienvenid@ a PedidosYa. Mi nombre es <span class="worker-name">[Tu Nombre]</span>, y estoy aquí para ayudarte con tu consulta o pedido. ¿En qué puedo ayudarte hoy?</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-bienvenida')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-bienvenida')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-bienvenida')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Tiempo de Espera -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Tiempo de Espera con Empatía</h2>
+      <p class="text-gray-700">Cuando necesites pedir al cliente que espere, usa este script para transmitir empatía:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-espera" contenteditable="false">Gracias por tu paciencia, [Nombre del Cliente]. Voy a verificar la información de tu pedido para darte la mejor solución. Por favor, dame un momento mientras reviso los detalles. ¡Enseguida estoy contigo!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-espera')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-espera')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-espera')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Retomar Conversación -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Retomar la Conversación</h2>
+      <p class="text-gray-700">Si dejaste al cliente en espera, retoma la conversación con este script:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-retomar" contenteditable="false">¡Hola, [Nombre del Cliente]! Gracias por esperar. Ya revisé la información de tu pedido. Permíteme explicarte la situación y cómo podemos ayudarte. ¿Te parece bien?</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-retomar')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-retomar')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-retomar')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Cancelaciones -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Cancelaciones</h2>
+      <p class="text-gray-700">Para gestionar cancelaciones de manera clara y empática, usa este script:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-cancelaciones" contenteditable="false">Lamento mucho las molestias, [Nombre del Cliente]. Entiendo que necesitas cancelar tu pedido. Voy a ayudarte con eso. Por favor, confírmame el número de pedido o el restaurante para procesar la cancelación lo antes posible. Si hay algún reembolso, te informaré los detalles en un momento.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-cancelaciones')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-cancelaciones')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-cancelaciones')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Consulta Adicional -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Consulta Adicional</h2>
+      <p class="text-gray-700">Para ofrecer ayuda adicional al cliente después de resolver su consulta inicial:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-consulta-adicional" contenteditable="false">[Nombre del Cliente], me alegra haber podido ayudarte con tu consulta. ¿Hay algo más en lo que pueda asistirte hoy? ¡Estoy aquí para ayudarte con cualquier otra duda o necesidad!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-consulta-adicional')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-consulta-adicional')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-consulta-adicional')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Verificación de Presencia -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Verificar si el Cliente Está en Línea</h2>
+      <p class="text-gray-700">Para confirmar si el cliente sigue conectado sin presionarlo:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-verificacion" contenteditable="false">Hola, [Nombre del Cliente], ¿sigues en línea? No quiero apresurarte, solo me aseguro de que estés ahí para continuar ayudándote. ¡Avísame cuando estés listo!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-verificacion')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-verificacion')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-verificacion')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Despedida -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Despedida</h2>
+      <p class="text-gray-700">Para cerrar la interacción de manera amable y profesional:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-despedida" contenteditable="false">Gracias por contactarnos, [Nombre del Cliente]. Ha sido un placer ayudarte. Si necesitas algo más, no dudes en escribirnos. ¡Que tengas un excelente día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-despedida')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-despedida')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-despedida')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Derivación a Encuesta (Satisfactorio) -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Derivación a Encuesta (Atención Satisfactoria)</h2>
+      <p class="text-gray-700">Para invitar al cliente a dejar feedback positivo tras una buena atención:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-encuesta-satisfactorio" contenteditable="false">¡Me alegra haber resuelto tu consulta, [Nombre del Cliente]! Si tienes un momento, te invito a completar una breve encuesta sobre tu experiencia con nuestro servicio. Tu opinión nos ayuda a mejorar. ¡Gracias y que tengas un gran día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-encuesta-satisfactorio')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-encuesta-satisfactorio')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-encuesta-satisfactorio')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Derivación a Encuesta (Insatisfecho) -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Derivación a Encuesta (Cliente Insatisfecho)</h2>
+      <p class="text-gray-700">Para manejar casos donde el cliente no quedó satisfecho, invitándolo a dejar feedback:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-encuesta-insatisfecho" contenteditable="false">Lamento mucho que no hayamos podido resolver tu consulta como esperabas, [Nombre del Cliente]. Tu opinión es muy importante para nosotros. ¿Podrías dedicar un momento a completar una breve encuesta? Esto nos ayudará a mejorar nuestro servicio. Gracias por tu tiempo y paciencia.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-encuesta-insatisfecho')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-encuesta-insatisfecho')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-encuesta-insatisfecho')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Despedida para Cliente Ausente -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Despedida para Cliente Ausente</h2>
+      <p class="text-gray-700">Para cerrar la interacción cuando el cliente no responde:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-ausente" contenteditable="false">Hola, [Nombre del Cliente], parece que no estás disponible en este momento. Si necesitas ayuda más adelante, no dudes en contactarnos nuevamente. ¡Gracias por elegir PedidosYa y que tengas un buen día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-ausente')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-ausente')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-ausente')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Consultas Frecuentes -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Consultas y Reclamos Frecuentes</h2>
+      <p class="text-gray-700">Aquí tienes algunos scripts adicionales para situaciones comunes:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-retraso" contenteditable="false">Siento mucho la demora, [Nombre del Cliente]. Voy a contactar al restaurante y al repartidor para darte una actualización exacta sobre el estado de tu pedido. Gracias por tu comprensión.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-retraso')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-retraso')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-retraso')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-producto" contenteditable="false">Lamento mucho esta situación, [Nombre del Cliente]. Por favor, dime qué producto falta o está incorrecto, y trabajaré con el restaurante para solucionarlo de inmediato, ya sea con un reemplazo o un reembolso.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-producto')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-producto')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-producto')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-reembolso" contenteditable="false">Entiendo tu preocupación, [Nombre del Cliente]. Voy a revisar el estado de tu reembolso y te confirmaré los detalles en un momento. Gracias por tu paciencia.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-reembolso')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-reembolso')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-reembolso')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2025 PedidosYa - Atención al Cliente</p>
+    </div>
+  </footer>
+
+  <script>
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('¡Texto copiado al portapapeles!');
+      }).catch(err => {
+        alert('Error al copiar el texto. Por favor, intenta de nuevo.');
+        console.error('Error al copiar el texto: ', err);
+      });
+    }
+
+    function toggleEdit(elementId) {
+      const element = document.getElementById(elementId);
+      const button = element.closest('.relative').querySelector('button[onclick*="toggleEdit"]');
+      const isEditable = element.getAttribute('contenteditable') === 'true';
+      
+      if (isEditable) {
+        element.setAttribute('contenteditable', 'false');
+        element.classList.remove('border', 'border-gray-300', 'p-2', 'bg-white');
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">';
+        localStorage.setItem(elementId, element.innerText); // Guardar cambios en localStorage
+        alert('Cambios guardados.');
+      } else {
+        element.setAttribute('contenteditable', 'true');
+        element.classList.add('border', 'border-gray-300', 'p-2', 'bg-white');
+        button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+        button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" alt="Guardar plantilla" class="w-5 h-5">';
+        element.focus();
+      }
+    }
+
+    function addTemplate(section) {
+      const newTemplateText = prompt('Ingresa el nuevo texto del template:');
+      if (newTemplateText) {
+        const templateContainer = section.querySelector('.mt-4.space-y-4');
+        const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        const newTemplateDiv = document.createElement('div');
+        newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+        newTemplateDiv.innerHTML = `
+          <p id="${newTemplateId}" contenteditable="false">${newTemplateText}</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        `;
+        templateContainer.appendChild(newTemplateDiv);
+        localStorage.setItem(newTemplateId, newTemplateText); // Guardar en localStorage
+        alert('Nuevo template añadido.');
+      }
+    }
+
+    function deleteTemplate(elementId) {
+      const confirmDelete = confirm('¿Estás seguro de que deseas eliminar este template?');
+      if (confirmDelete) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.closest('.p-4.bg-gray-50').remove();
+          localStorage.removeItem(elementId); // Eliminar de localStorage
+          alert('Template eliminado.');
+        }
+      }
+    }
+
+    function addSection() {
+      const sectionTitle = prompt('Ingresa el título de la nueva sección:');
+      if (!sectionTitle || sectionTitle.trim() === '') {
+        alert('El título de la sección no puede estar vacío.');
+        return;
+      }
+      const existingSections = Array.from(document.querySelectorAll('section h2')).map(h2 => h2.textContent);
+      if (existingSections.includes(sectionTitle.trim())) {
+        alert('Ya existe una sección con ese título. Por favor, elige otro.');
+        return;
+      }
+      const main = document.querySelector('main');
+      const newSection = document.createElement('section');
+      newSection.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+      newSection.innerHTML = `
+        <h2 class="text-2xl font-semibold text-red-600 mb-4">${sectionTitle.trim()}</h2>
+        <p class="text-gray-700">Añade scripts para esta sección.</p>
+        <div class="mt-4 space-y-4"></div>
+        <div class="absolute top-6 right-6 flex space-x-2">
+          <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+          </button>
+        </div>
+      `;
+      main.appendChild(newSection);
+      alert('Sección añadida.');
+    }
+
+    function personalizeScripts() {
+      const workerEmail = localStorage.getItem('workerEmail') || 'Usuario no identificado';
+      const workerName = localStorage.getItem('workerName') || 'Usuario';
+      const initials = workerName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+      
+      document.getElementById('worker-email').textContent = `Sesión iniciada como: ${workerEmail}`;
+      document.getElementById('user-initials').textContent = initials;
+      const elements = document.querySelectorAll('.worker-name');
+      elements.forEach(element => {
+        element.textContent = workerName;
+      });
+
+      // Cargar plantillas guardadas desde localStorage
+      document.querySelectorAll('[id^="script-"]').forEach(element => {
+        const savedText = localStorage.getItem(element.id);
+        if (savedText) {
+          element.textContent = savedText;
+        }
+      });
+    }
+
+    function saveTemplatesToFile() {
+      const templates = [];
+      document.querySelectorAll('section').forEach(section => {
+        const sectionTitle = section.querySelector('h2').textContent;
+        section.querySelectorAll('[id^="script-"]').forEach(el => {
+          templates.push(`${sectionTitle}:\n${el.textContent.trim()}\n`);
+        });
+      });
+
+      const blob = new Blob([templates.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'templates.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('Templates guardados como templates.txt');
+    }
+
+    function loadTemplatesFromFile(event) {
+      if (!confirm('Cargar un nuevo archivo eliminará todas las plantillas actuales. ¿Continuar?')) return;
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        const lines = content.split('\n').filter(line => line.trim());
+        if (!lines.some(line => line.endsWith(':'))) {
+          alert('Archivo inválido: debe contener al menos un título de sección.');
+          return;
+        }
+        let currentSection = null;
+
+        // Limpiar los templates existentes
+        document.querySelectorAll('section .mt-4.space-y-4').forEach(container => {
+          container.innerHTML = '';
+        });
+
+        // Cargar los nuevos templates
+        lines.forEach(line => {
+          line = line.trim();
+          if (line.endsWith(':')) {
+            currentSection = line.slice(0, -1);
+            // Verificar si la sección ya existe
+            let sectionElement = Array.from(document.querySelectorAll('section')).find(
+              section => section.querySelector('h2').textContent === currentSection
+            );
+            // Si no existe, crear una nueva sección
+            if (!sectionElement) {
+              const main = document.querySelector('main');
+              sectionElement = document.createElement('section');
+              sectionElement.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+              sectionElement.innerHTML = `
+                <h2 class="text-2xl font-semibold text-red-600 mb-4">${currentSection}</h2>
+                <p class="text-gray-700">Añade scripts para esta sección.</p>
+                <div class="mt-4 space-y-4"></div>
+                <div class="absolute top-6 right-6 flex space-x-2">
+                  <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+                  </button>
+                </div>
+              `;
+              main.appendChild(sectionElement);
+            }
+          } else if (line && currentSection) {
+            const sectionElement = Array.from(document.querySelectorAll('section')).find(
+              section => section.querySelector('h2').textContent === currentSection
+            );
+            if (sectionElement) {
+              const templateContainer = sectionElement.querySelector('.mt-4.space-y-4');
+              const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+              const newTemplateDiv = document.createElement('div');
+              newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+              newTemplateDiv.innerHTML = `
+                <p id="${newTemplateId}" contenteditable="false">${line}</p>
+                <div class="flex justify-between items-center mt-2">
+                  <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+                </div>
+                <div class="absolute top-4 right-4 flex space-x-2">
+                  <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+                  </button>
+                  <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+                  </button>
+                </div>
+              `;
+              templateContainer.appendChild(newTemplateDiv);
+              localStorage.setItem(newTemplateId, line); // Guardar en localStorage
+            }
+          }
+        });
+        personalizeScripts(); // Actualizar nombres en las nuevas plantillas
+        alert('Templates cargados correctamente');
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById('user-menu-button').addEventListener('click', function(e) {
+      const menu = document.getElementById('user-menu');
+      menu.classList.toggle('hidden');
+      e.stopPropagation();
+    });
+
+    document.getElementById('logout').addEventListener('click', function(e) {
+      e.preventDefault();
+      const confirmLogout = confirm("¿Estás seguro de que deseas cerrar sesión?");
+      if (confirmLogout) {
+        localStorage.clear();
+        alert("Sesión cerrada correctamente.");
+        window.location.href = 'index.html';
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('user-menu');
+      if (!menu.contains(e.target) && e.target !== document.getElementById('user-menu-button')) {
+        menu.classList.add('hidden');
+      }
+    });
+
+    window.onload = function() {
+      // Verificar si hay una sesión activa
+      if (!localStorage.getItem('workerEmail')) {
+        alert('No has iniciado sesión. Serás redirigido al login.');
+        window.location.href = 'index.html';
+        return;
+      }
+      personalizeScripts();
+    };
+  </script>
+</body>
+</html>
