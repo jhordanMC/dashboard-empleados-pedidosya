@@ -123,6 +123,7 @@
         }
 
         const validEmails = [
+            "jadmin@pedidosya.com",
             "jhordan.medina_apx.ext@pedidosya.com",
             "sergio.ccopa_apx.ext@pedidosya.com",
             "maryuri.ruiz_apx.ext@pedidosya.com",
@@ -147,7 +148,7 @@
             const password = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
 
-            if (validEmails.includes(email) && password === "asesor123") {
+            if (validEmails.includes(email) && password === "asesor123"|| validEmails.includes("jadmin@pedidosya.com")&& password=="admin123") {
                 const workerName = email.split(/[_\.@]/)[0]
                     .split(' ')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
