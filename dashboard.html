@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atención al Cliente - PedidosYa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="ciro.jpg">
+  <link rel="apple-touch-icon" href="ciro.jpg">
+</head>
+<body class="bg-gray-100 font-sans">
+  <header class="bg-red-600 text-white py-6 flex items-center justify-between">
+    <div class="container mx-auto flex items-center justify-center">
+      <div class="text-center">
+        <h1 class="text-3xl font-bold mb-2">Atención al Cliente - PedidosYa</h1>
+        <p class="mb-2">Scripts y guías para consultas y reclamos frecuentes</p>
+        <p class="text-sm" id="worker-email">Sesión iniciada como: Cargando...</p>
+      </div>
+    </div>
+    <div class="relative mr-6">
+      <button id="user-menu-button" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-800 hover:bg-gray-400 focus:outline-none">
+        <span id="user-initials"></span>
+      </button>
+      <div id="user-menu" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-2 z-10">
+        <a href="#" id="logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Cerrar sesión</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto py-8">
+    <!-- Sección intermedia para los botones -->
+    <div class="mb-8 bg-white p-6 rounded-lg shadow-md flex justify-center space-x-4">
+      <button onclick="saveTemplatesToFile()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Guardar Templates en TXT</button>
+      <label for="load-templates-input" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 cursor-pointer">Cargar Templates</label>
+      <input type="file" id="load-templates-input" accept=".txt" class="hidden" onchange="loadTemplatesFromFile(event)">
+      <button onclick="addSection()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center">
+        <img src="https://cdn-icons-png.flaticon.com/512/992/992651.png" alt="Añadir sección" class="w-5 h-5 mr-2"> Añadir Sección
+      </button>
+    </div>
+
+    <!-- Nuevo contenedor .ccr-container-pf -->
+    <div class="ccr-container-pf mb-8 bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Estado del Pedido</h2>
+      <div class="flex items-center space-x-4">
+        <div>
+          <label for="estado_pedido" id="estado_label" class="block text-gray-700 font-medium mb-2">Elige el CCR4 actual</label>
+          <select name="estado_pedido" id="estado_pedido" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" onchange="handleSelectionChange()">
+            <option value="" disabled selected>Selecciona una opción</option>
+            <option value="procesando">Estamos procesando tu pedido</option>
+            <option value="preparando">El local está preparando tu pedido / El local está terminando tu pedido</option>
+            <option value="repartidor_retirando">El repartidor llegó a retirar tu pedido</option>
+            <option value="en_camino">Tu pedido está en camino / Tu pedido está llegando</option>
+          </select>
+        </div>
+        <button onclick="resetOptions()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Recargar</button>
+      </div>
+      <div class="mt-4">
+        <label for="hora_entrega" class="text-gray-700 font-medium">Hora aproximada de entrega (HH:MM):</label>
+        <input type="text" id="hora_entrega" placeholder="Ej. 14:30" class="mt-2 p-2 border border-gray-300 rounded-md w-24 focus:outline-none focus:ring-2 focus:ring-red-500">
+      </div>
+    </div>
+
+    <!-- Sección de Bienvenida -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Bienvenida</h2>
+      <p class="text-gray-700">Utiliza este script para iniciar la conversación con el cliente de manera amable y profesional:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-bienvenida" contenteditable="false">¡Hola! Bienvenid@ a PedidosYa. Mi nombre es <span class="worker-name">[Tu Nombre]</span>, y estoy aquí para ayudarte con tu consulta o pedido. ¿En qué puedo ayudarte hoy?</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-bienvenida')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-bienvenida')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-bienvenida')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Tiempo de Espera -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Tiempo de Espera con Empatía</h2>
+      <p class="text-gray-700">Cuando necesites pedir al cliente que espere, usa este script para transmitir empatía:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-espera" contenteditable="false">Gracias por tu paciencia, [Nombre del Cliente]. Voy a verificar la información de tu pedido para darte la mejor solución. Por favor, dame un momento mientras reviso los detalles. ¡Enseguida estoy contigo!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-espera')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-espera')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-espera')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Retomar Conversación -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Retomar la Conversación</h2>
+      <p class="text-gray-700">Si dejaste al cliente en espera, retoma la conversación con este script:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-retomar" contenteditable="false">¡Hola, [Nombre del Cliente]! Gracias por esperar. Ya revisé la información de tu pedido. Permíteme explicarte la situación y cómo podemos ayudarte. ¿Te parece bien?</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-retomar')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-retomar')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-retomar')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Cancelaciones -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Cancelaciones</h2>
+      <p class="text-gray-700">Para gestionar cancelaciones de manera clara y empática, usa este script:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-cancelaciones" contenteditable="false">Lamento mucho las molestias, [Nombre del Cliente]. Entiendo que necesitas cancelar tu pedido. Voy a ayudarte con eso. Por favor, confírmame el número de pedido o el restaurante para procesar la cancelación lo antes posible. Si hay algún reembolso, te informaré los detalles en un momento.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-cancelaciones')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-cancelaciones')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-cancelaciones')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Consulta Adicional -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Consulta Adicional</h2>
+      <p class="text-gray-700">Para ofrecer ayuda adicional al cliente después de resolver su consulta inicial:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-consulta-adicional" contenteditable="false">[Nombre del Cliente], me alegra haber podido ayudarte con tu consulta. ¿Hay algo más en lo que pueda asistirte hoy? ¡Estoy aquí para ayudarte con cualquier otra duda o necesidad!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-consulta-adicional')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-consulta-adicional')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-consulta-adicional')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Verificación de Presencia -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech para Verificar si el Cliente Está en Línea</h2>
+      <p class="text-gray-700">Para confirmar si el cliente sigue conectado sin presionarlo:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-verificacion" contenteditable="false">Hola, [Nombre del Cliente], ¿sigues en línea? No quiero apresurarte, solo me aseguro de que estés ahí para continuar ayudándote. ¡Avísame cuando estés listo!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-verificacion')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-verificacion')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-verificacion')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Despedida -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Despedida</h2>
+      <p class="text-gray-700">Para cerrar la interacción de manera amable y profesional:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-despedida" contenteditable="false">Gracias por contactarnos, [Nombre del Cliente]. Ha sido un placer ayudarte. Si necesitas algo más, no dudes en escribirnos. ¡Que tengas un excelente día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-despedida')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-despedida')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-despedida')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Derivación a Encuesta (Satisfactorio) -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Derivación a Encuesta (Atención Satisfactoria)</h2>
+      <p class="text-gray-700">Para invitar al cliente a dejar feedback positivo tras una buena atención:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-encuesta-satisfactorio" contenteditable="false">¡Me alegra haber resuelto tu consulta, [Nombre del Cliente]! Si tienes un momento, te invito a completar una breve encuesta sobre tu experiencia con nuestro servicio. Tu opinión nos ayuda a mejorar. ¡Gracias y que tengas un gran día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-encuesta-satisfactorio')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-encuesta-satisfactorio')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-encuesta-satisfactorio')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Derivación a Encuesta (Insatisfecho) -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Derivación a Encuesta (Cliente Insatisfecho)</h2>
+      <p class="text-gray-700">Para manejar casos donde el cliente no quedó satisfecho, invitándolo a dejar feedback:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-encuesta-insatisfecho" contenteditable="false">Lamento mucho que no hayamos podido resolver tu consulta como esperabas, [Nombre del Cliente]. Tu opinión es muy importante para nosotros. ¿Podrías dedicar un momento a completar una breve encuesta? Esto nos ayudará a mejorar nuestro servicio. Gracias por tu tiempo y paciencia.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-encuesta-insatisfecho')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-encuesta-insatisfecho')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-encuesta-insatisfecho')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Despedida para Cliente Ausente -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Speech de Despedida para Cliente Ausente</h2>
+      <p class="text-gray-700">Para cerrar la interacción cuando el cliente no responde:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-ausente" contenteditable="false">Hola, [Nombre del Cliente], parece que no estás disponible en este momento. Si necesitas ayuda más adelante, no dudes en contactarnos nuevamente. ¡Gracias por elegir PedidosYa y que tengas un buen día!</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-ausente')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-ausente')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-ausente')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+
+    <!-- Sección de Consultas Frecuentes -->
+    <section class="mb-8 bg-white p-6 rounded-lg shadow-md relative">
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">Consultas y Reclamos Frecuentes</h2>
+      <p class="text-gray-700">Aquí tienes algunos scripts adicionales para situaciones comunes:</p>
+      <div class="mt-4 space-y-4">
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-retraso" contenteditable="false">Siento mucho la demora, [Nombre del Cliente]. Voy a contactar al restaurante y al repartidor para darte una actualización exacta sobre el estado de tu pedido. Gracias por tu comprensión.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-retraso')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-retraso')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-retraso')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-producto" contenteditable="false">Lamento mucho esta situación, [Nombre del Cliente]. Por favor, dime qué producto falta o está incorrecto, y trabajaré con el restaurante para solucionarlo de inmediato, ya sea con un reemplazo o un reembolso.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-producto')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-producto')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-producto')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+        <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
+          <p id="script-reembolso" contenteditable="false">Entiendo tu preocupación, [Nombre del Cliente]. Voy a revisar el estado de tu reembolso y te confirmaré los detalles en un momento. Gracias por tu paciencia.</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('script-reembolso')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('script-reembolso')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('script-reembolso')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-gray-800 text-white py-4">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2025 PedidosYa - Atención al Cliente</p>
+    </div>
+  </footer>
+
+  <script>
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('¡Texto copiado al portapapeles!');
+      }).catch(err => {
+        alert('Error al copiar el texto. Por favor, intenta de nuevo.');
+        console.error('Error al copiar el texto: ', err);
+      });
+    }
+
+    function toggleEdit(elementId) {
+      const element = document.getElementById(elementId);
+      const button = element.closest('.relative').querySelector('button[onclick*="toggleEdit"]');
+      const isEditable = element.getAttribute('contenteditable') === 'true';
+      
+      if (isEditable) {
+        element.setAttribute('contenteditable', 'false');
+        element.classList.remove('border', 'border-gray-300', 'p-2', 'bg-white');
+        button.classList.remove('bg-green-600', 'hover:bg-green-700');
+        button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+        button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">';
+        localStorage.setItem(elementId, element.innerText); // Guardar cambios en localStorage
+        alert('Cambios guardados.');
+      } else {
+        element.setAttribute('contenteditable', 'true');
+        element.classList.add('border', 'border-gray-300', 'p-2', 'bg-white');
+        button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        button.classList.add('bg-green-600', 'hover:bg-green-700');
+        button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" alt="Guardar plantilla" class="w-5 h-5">';
+        element.focus();
+      }
+    }
+
+    function addTemplate(section) {
+      const newTemplateText = prompt('Ingresa el nuevo texto del template:');
+      if (newTemplateText) {
+        const templateContainer = section.querySelector('.mt-4.space-y-4');
+        const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        const newTemplateDiv = document.createElement('div');
+        newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+        newTemplateDiv.innerHTML = `
+          <p id="${newTemplateId}" contenteditable="false">${newTemplateText}</p>
+          <div class="flex justify-between items-center mt-2">
+            <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+          </div>
+          <div class="absolute top-4 right-4 flex space-x-2">
+            <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+            </button>
+            <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+            </button>
+          </div>
+        `;
+        templateContainer.appendChild(newTemplateDiv);
+        localStorage.setItem(newTemplateId, newTemplateText); // Guardar en localStorage
+        alert('Nuevo template añadido.');
+      }
+    }
+
+    function deleteTemplate(elementId) {
+      const confirmDelete = confirm('¿Estás seguro de que deseas eliminar este template?');
+      if (confirmDelete) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.closest('.p-4.bg-gray-50').remove();
+          localStorage.removeItem(elementId); // Eliminar de localStorage
+          alert('Template eliminado.');
+        }
+      }
+    }
+
+    function addSection() {
+      const sectionTitle = prompt('Ingresa el título de la nueva sección:');
+      if (!sectionTitle || sectionTitle.trim() === '') {
+        alert('El título de la sección no puede estar vacío.');
+        return;
+      }
+      const existingSections = Array.from(document.querySelectorAll('section h2')).map(h2 => h2.textContent);
+      if (existingSections.includes(sectionTitle.trim())) {
+        alert('Ya existe una sección con ese título. Por favor, elige otro.');
+        return;
+      }
+      const main = document.querySelector('main');
+      const newSection = document.createElement('section');
+      newSection.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+      newSection.innerHTML = `
+        <h2 class="text-2xl font-semibold text-red-600 mb-4">${sectionTitle.trim()}</h2>
+        <p class="text-gray-700">Añade scripts para esta sección.</p>
+        <div class="mt-4 space-y-4"></div>
+        <div class="absolute top-6 right-6 flex space-x-2">
+          <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+          </button>
+        </div>
+      `;
+      main.appendChild(newSection);
+      alert('Sección añadida.');
+    }
+
+    function personalizeScripts() {
+      const workerEmail = localStorage.getItem('workerEmail') || 'Usuario no identificado';
+      const workerName = localStorage.getItem('workerName') || 'Usuario';
+      const initials = workerName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+      
+      document.getElementById('worker-email').textContent = `Sesión iniciada como: ${workerEmail}`;
+      document.getElementById('user-initials').textContent = initials;
+      const elements = document.querySelectorAll('.worker-name');
+      elements.forEach(element => {
+        element.textContent = workerName;
+      });
+
+      // Cargar plantillas guardadas desde localStorage
+      document.querySelectorAll('[id^="script-"]').forEach(element => {
+        const savedText = localStorage.getItem(element.id);
+        if (savedText) {
+          element.textContent = savedText;
+        }
+      });
+    }
+
+    function saveTemplatesToFile() {
+      const templates = [];
+      document.querySelectorAll('section').forEach(section => {
+        const sectionTitle = section.querySelector('h2').textContent;
+        section.querySelectorAll('[id^="script-"]').forEach(el => {
+          templates.push(`${sectionTitle}:\n${el.textContent.trim()}\n`);
+        });
+      });
+
+      const blob = new Blob([templates.join('\n')], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'templates.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert('Templates guardados como templates.txt');
+    }
+
+    function loadTemplatesFromFile(event) {
+      if (!confirm('Cargar un nuevo archivo eliminará todas las plantillas actuales. ¿Continuar?')) return;
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const content = e.target.result;
+        const lines = content.split('\n').filter(line => line.trim());
+        if (!lines.some(line => line.endsWith(':'))) {
+          alert('Archivo inválido: debe contener al menos un título de sección.');
+          return;
+        }
+        let currentSection = null;
+
+        // Limpiar los templates existentes
+        document.querySelectorAll('section .mt-4.space-y-4').forEach(container => {
+          container.innerHTML = '';
+        });
+
+        // Cargar los nuevos templates
+        lines.forEach(line => {
+          line = line.trim();
+          if (line.endsWith(':')) {
+            currentSection = line.slice(0, -1);
+            // Verificar si la sección ya existe
+            let sectionElement = Array.from(document.querySelectorAll('section')).find(
+              section => section.querySelector('h2').textContent === currentSection
+            );
+            // Si no existe, crear una nueva sección
+            if (!sectionElement) {
+              const main = document.querySelector('main');
+              sectionElement = document.createElement('section');
+              sectionElement.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+              sectionElement.innerHTML = `
+                <h2 class="text-2xl font-semibold text-red-600 mb-4">${currentSection}</h2>
+                <p class="text-gray-700">Añade scripts para esta sección.</p>
+                <div class="mt-4 space-y-4"></div>
+                <div class="absolute top-6 right-6 flex space-x-2">
+                  <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+                  </button>
+                </div>
+              `;
+              main.appendChild(sectionElement);
+            }
+          } else if (line && currentSection) {
+            const sectionElement = Array.from(document.querySelectorAll('section')).find(
+              section => section.querySelector('h2').textContent === currentSection
+            );
+            if (sectionElement) {
+              const templateContainer = sectionElement.querySelector('.mt-4.space-y-4');
+              const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+              const newTemplateDiv = document.createElement('div');
+              newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+              newTemplateDiv.innerHTML = `
+                <p id="${newTemplateId}" contenteditable="false">${line}</p>
+                <div class="flex justify-between items-center mt-2">
+                  <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+                </div>
+                <div class="absolute top-4 right-4 flex space-x-2">
+                  <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+                  </button>
+                  <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+                  </button>
+                </div>
+              `;
+              templateContainer.appendChild(newTemplateDiv);
+              localStorage.setItem(newTemplateId, line); // Guardar en localStorage
+            }
+          }
+        });
+        personalizeScripts(); // Actualizar nombres en las nuevas plantillas
+        alert('Templates cargados correctamente');
+      };
+      reader.readAsText(file);
+    }
+
+    let currentCCR4 = '';
+    let currentOneView = '';
+    let currentIssue = '';
+
+    const ccr4Map = {
+      'procesando': 'Procesando',
+      'preparando': 'Preparando',
+      'repartidor_retirando': 'Retirando',
+      'en_camino': 'EnCamino'
+    };
+
+    const oneViewMap = {
+      'queued_reasignado': 'QueuedReasignado',
+      'queued_reasignado_preparando': 'QueuedReasignado',
+      'rider_acepto_preparando': 'RiderAcepto',
+      'queued_reasignado_retirando': 'QueuedReasignado',
+      'rider_acepto_retirando': 'RiderAcepto',
+      'rider_pickup_retirando': 'RiderPickup',
+      'rider_pickup_dejo': 'RiderPickupDejo',
+      'rider_dropoff': 'RiderDropoff'
+    };
+
+    const speeches = {
+      'Procesando_QueuedReasignado_tiempo_repartidor_ontime': 'Nos encontramos en la etapa de búsqueda de un rider, nos está tomando más tiempo de lo habitual encontrarlo. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Procesando_QueuedReasignado_tiempo_repartidor_delay': 'Nos está costando más tiempo de lo habitual asignarte un rider. Te avisaremos cuando el local comience a preparar tu pedido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_QueuedReasignado_tiempo_repartidor_ontime': 'Nos encontramos en la etapa de búsqueda de un rider, nos está tomando más tiempo de lo habitual encontrarlo. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Preparando_QueuedReasignado_tiempo_repartidor_delay': 'Nos encontramos en la etapa de búsqueda de un rider, nos está tomando más tiempo de lo habitual encontrarlo. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_QueuedReasignado_cambio_repartidor_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya nos encontramos en busca de otro. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Preparando_QueuedReasignado_cambio_repartidor_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya nos encontramos en busca de otro. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Preparando_QueuedReasignado_sin_issue_ontime': 'Estamos en etapa de búsqueda de un rider para tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Preparando_QueuedReasignado_sin_issue_delay': 'Nos encontramos en la etapa de búsqueda de un rider, nos está tomando más tiempo de lo habitual encontrarlo. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_tiempo_repartidor_ontime': 'Nos costó conseguir rider pero ya se encuentra en camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_tiempo_repartidor_delay': 'Nos costó conseguir rider, pero ya se encuentra en camino al local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_cambio_repartidor_ontime': 'Nos costó conseguir rider pero ya se encuentra en camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_cambio_repartidor_delay': 'Nos costó conseguir rider, pero ya se encuentra en camino al local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_sin_issue_ontime': 'El rider se encuentra en camino al local. Verifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_sin_issue_delay': 'Nos costó conseguir rider, pero ya se encuentra en camino al local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_demorado_recoger_ontime': 'El rider tuvo una demora pero ya se encuentra en camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Preparando_RiderAcepto_demorado_recoger_delay': 'El rider tuvo una demora pero ya se encuentra en camino al local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_tiempo_repartidor_ontime': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. Puede que nos demoremos un poco más del tiempo establecido.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_tiempo_repartidor_delay': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_cambio_repartidor_ontime': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. Puede que nos demoremos un poco más del tiempo establecido.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_cambio_repartidor_delay': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_demorado_recoger_ontime': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. Puede que nos demoremos un poco más del tiempo establecido.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_demorado_recoger_delay': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_local_demorado_ontime': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. Puede que nos demoremos un poco más del tiempo establecido.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_local_demorado_delay': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_sin_issue_ontime': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. Puede que nos demoremos un poco más del tiempo establecido.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_QueuedReasignado_sin_issue_delay': 'El rider asignado a tu pedido llegó al local, pero no pudo continuar con la entrega. Estamos buscando otro rider para asignarlo a tu orden. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_tiempo_repartidor_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_tiempo_repartidor_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_cambio_repartidor_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_cambio_repartidor_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_demorado_recoger_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_demorado_recoger_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_local_demorado_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_local_demorado_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_sin_issue_ontime': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local. Puede que tu orden se demore un poco más del tiempo establecido. \n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderAcepto_sin_issue_delay': 'El rider asignado a tu pedido no pudo continuar con la entrega, pero ya asignamos a otra persona y se encuentra camino al local.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderPickup_tiempo_repartidor_ontime': 'Nos costó conseguir un rider pero ya se encuentra en el local. Verifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_cambio_repartidor_ontime': 'Nos costó conseguir un rider pero ya se encuentra en el local. Verifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_demorado_recoger_ontime': 'Nos costó conseguir un rider pero ya se encuentra en el local. Verifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_local_demorado_ontime': 'El local se demoró un poco más de lo previsto, pero tu rider ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. ',
+      'Retirando_RiderPickup_sin_issue_ontime': 'El rider ya se encuentra en el local. Verifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_tiempo_repartidor_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_cambio_repartidor_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_demorado_recoger_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_local_demorado_delay': 'El local se demoró un poco más de lo previsto, pero tu rider ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'Retirando_RiderPickup_sin_issue_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya se encuentra en el local. \nVerifiqué que la hora aproximada de entrega será a las XX:XX.',
+      'EnCamino_RiderPickupDejo_tiempo_repartidor_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_tiempo_repartidor_delay': 'Nos costó conseguir rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_cambio_repartidor_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_cambio_repartidor_delay': 'Nos costó conseguir rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_demorado_recoger_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_demorado_recoger_delay': 'Nos costó conseguir rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX.\n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_todos_issue_stacking_esperando_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido, se encuentra en el local esperando por otro pedido y pronto saldrá a repartirlos.\n\nVerifiqué que la hora aproximada de entrega será a las XX:XX. Recuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_todos_issue_stacking_esperando_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido, se encuentra en el local esperando por otro pedido y pronto saldrá a repartirlos. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_todos_issue_stacking_segunda_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega se encuentra camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. \nVerifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_todos_issue_stacking_segunda_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega se encuentra camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_ontime': 'El local se demoró un poco más de lo previsto, pero tu rider ya se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. Recuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_delay': 'El local se demoró un poco más de lo previsto, pero tu rider ya tiene tu orden y se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_stacking_segunda_ontime': 'El local se demoró un poco más de lo previsto, pero tu rider ya está en camino a entregar otra orden, próximo a tu dirección y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_stacking_segunda_delay': 'El local se demoró un poco más de lo previsto, pero tu rider ya está en camino a entregar otra orden, próximo a tu dirección y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_stacking_esperando_ontime': 'El local se demoró un poco más de lo previsto, pero tu rider ya tiene tu pedido, se encuentra en el local esperando por otro pedido, y pronto saldrá a repartirlos. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_local_demorado_stacking_esperando_delay': 'El local se demoró un poco más de lo previsto, pero tu rider ya tiene tu pedido, se encuentra en el local esperando por otro pedido, y pronto saldrá a repartirlos. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_repartidor_poco_demorado_ontime': 'El rider tuvo una demora pero ya se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderPickupDejo_repartidor_poco_demorado_delay': 'Tuvimos una demora con tu orden, pero el rider ya se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_repartidor_demorado_stacking_esperando_ontime': 'El rider tuvo una demora pero ya tiene tu pedido, se encuentra en el local esperando por otra orden, y pronto saldrá a repartirlos.\nVerifiqué que la hora aproximada de entrega será a las XX:XX.\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_repartidor_demorado_stacking_esperando_delay': 'Tuvimos una demora con tu orden, pero el rider ya está en camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_repartidor_demorado_stacking_segunda_ontime': 'El rider tuvo una demora, pero ya está en camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_repartidor_demorado_stacking_segunda_delay': 'El rider tuvo una demora pero ya está en camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_sin_issue_ontime': 'El rider ya se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderPickupDejo_sin_issue_delay': 'Tuvimos una demora con tu orden, pero el rider ya se encuentra en camino a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_sin_issue_stacking_esperando_ontime': 'El rider ya tiene tu orden, está en el local esperando por otro pedido, y pronto saldrá a repartirlos. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderPickupDejo_sin_issue_stacking_esperando_delay': 'El rider ya tiene tu orden, está en el local esperando por otro pedido, y pronto saldrá a repartirlos. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderPickupDejo_sin_issue_stacking_segunda_ontime': 'El rider se encuentra en camino a entregar otra orden, próximo a tu dirección y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderPickupDejo_sin_issue_stacking_segunda_delay': 'Tuvimos una demora con tu orden pero tu rider ya está en camino a entregar otra orden, próximo a tu dirección, y luego te llevará tu pedido. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_tiempo_repartidor_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderDropoff_tiempo_repartidor_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_cambio_repartidor_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderDropoff_cambio_repartidor_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_demorado_recoger_ontime': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderDropoff_demorado_recoger_delay': 'Nos costó conseguir un rider, pero la persona encargada de tu entrega ya tiene tu pedido y se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_local_demorado_ontime': 'El local se demoró un poco más de lo previsto, pero tu rider ya se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega',
+      'EnCamino_RiderDropoff_local_demorado_delay': 'El local se demoró un poco más de lo previsto, pero tu rider ya tiene tu orden y se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_repartidor_poco_demorado_ontime': 'El rider tuvo una demora pero ya se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_repartidor_poco_demorado_delay': 'Tuvimos una demora con tu orden, pero el rider ya se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_sin_issue_ontime': 'El rider ya se encuentra llegando a tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.',
+      'EnCamino_RiderDropoff_sin_issue_delay': 'Tuvimos una demora con tu orden, pero el rider ya se encuentra cerca de tu dirección. Verifiqué que la hora aproximada de entrega será a las XX:XX. \n\nRecuerda que puedes escribirle por el chat de la app y brindarle alguna referencia para llegar al lugar de entrega.'
+    };
+    const parents = [
+    'procesando', 'preparando', 'repartidor_retirando', 'en_camino',
+    'queued_reasignado', 'queued_reasignado_preparando', 'rider_acepto_preparando',
+    'queued_reasignado_retirando', 'rider_acepto_retirando', 'rider_pickup_retirando',
+    'rider_pickup_dejo', 'rider_dropoff'
+];
+  function handleSelectionChange() {
+    const select = document.getElementById('estado_pedido');
+    const label = document.getElementById('estado_label');
+    const horaEntregaInput = document.getElementById('hora_entrega');
+    const selectedValue = select.value;
+    console.log('Valor seleccionado:', selectedValue);
+
+    if (selectedValue === '') return; // No hacer nada si es la opción por defecto
+
+    if (parents.includes(selectedValue)) {
+        // Guardar el estado actual
+        if (['procesando', 'preparando', 'repartidor_retirando', 'en_camino'].includes(selectedValue)) {
+            currentCCR4 = selectedValue;
+            currentOneView = '';
+            currentIssue = '';
+        } else {
+            currentOneView = selectedValue;
+        }
+
+        select.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.text = 'Selecciona una opción';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        select.appendChild(defaultOption);
+        label.textContent = 'Elige el estado de one view actual';
+        select.style.backgroundColor = ''; // Resetear color de fondo
+
+        function createOption(value, text) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.text = text;
+            select.appendChild(option);
+        }
+
+        switch (selectedValue) {
+            case 'procesando':
+                createOption('queued_reasignado', '1.1. Queued Reasignado');
+                break;
+            case 'queued_reasignado':
+                createOption('tiempo_repartidor', '1.1.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                break;
+            case 'preparando':
+                createOption('queued_reasignado_preparando', '1.1. Queued Reasignado');
+                createOption('rider_acepto_preparando', '1.2. Rider aceptó el pedido (Courier accepted)');
+                break;
+            case 'queued_reasignado_preparando':
+                createOption('tiempo_repartidor', '1.1.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.1.2. Tuvimos un cambio de repartidor');
+                createOption('sin_issue', '1.1.3. Sin issue');
+                break;
+            case 'rider_acepto_preparando':
+                createOption('tiempo_repartidor', '1.2.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.2.2. Tuvimos un cambio de repartidor');
+                createOption('sin_issue', '1.2.3. Sin issue');
+                createOption('demorado_recoger', '1.2.4. El repartidor se encuentra demorado para recoger el pedido');
+                break;
+            case 'repartidor_retirando':
+                createOption('queued_reasignado_retirando', '1.1. Queued Reasignado');
+                createOption('rider_acepto_retirando', '1.2. Rider aceptó el pedido (Courier accepted)');
+                createOption('rider_pickup_retirando', '1.3. Rider en el Pick Up');
+                break;
+            case 'queued_reasignado_retirando':
+                createOption('tiempo_repartidor', '1.1.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.1.2. Tuvimos un cambio de repartidor');
+                createOption('demorado_recoger', '1.1.3. El repartidor se encuentra demorado para recoger el pedido');
+                createOption('local_demorado', '1.1.4. El local está demorado');
+                createOption('sin_issue', '1.1.5. Sin issue');
+                break;
+            case 'rider_acepto_retirando':
+                createOption('tiempo_repartidor', '1.2.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.2.2. Tuvimos un cambio de repartidor');
+                createOption('demorado_recoger', '1.2.3. El repartidor se encuentra demorado para recoger el pedido');
+                createOption('local_demorado', '1.2.4. El local está demorado');
+                createOption('sin_issue', '1.2.5. Sin issue');
+                break;
+            case 'rider_pickup_retirando':
+                createOption('tiempo_repartidor', '1.3.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.3.2. Tuvimos un cambio de repartidor');
+                createOption('demorado_recoger', '1.3.3. El repartidor se encuentra demorado para recoger el pedido');
+                createOption('local_demorado', '1.3.4. El local está demorado');
+                createOption('sin_issue', '1.3.5. Sin issue');
+                break;
+            case 'en_camino':
+                createOption('rider_pickup_dejo', '1.1. Rider en el pick up / Rider dejó el pick up');
+                createOption('rider_dropoff', '1.2. Rider cerca del dropoff');
+                break;
+            case 'rider_pickup_dejo':
+                createOption('tiempo_repartidor', '1.1.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.1.2. Tuvimos un cambio de repartidor');
+                createOption('demorado_recoger', '1.1.3. El repartidor se encuentra demorado para recoger el pedido');
+                createOption('todos_issue_stacking_esperando', '1.1.4. Todos los issues anteriores + Con Stacking esperando otra orden');
+                createOption('todos_issue_stacking_segunda', '1.1.5. Todos los issues + Stacking segunda/tercera entrega');
+                createOption('local_demorado', '1.1.6. El local está demorado');
+                createOption('local_demorado_stacking_segunda', '1.1.7. Local está demorado + Stacking segunda/tercera entrega');
+                createOption('local_demorado_stacking_esperando', '1.1.8. Local está demorado + Con Stacking esperando otra orden');
+                createOption('repartidor_poco_demorado', '1.1.9. El repartidor está un poco demorado');
+                createOption('repartidor_demorado_stacking_esperando', '1.1.10. Repartidor un poco demorado + Con Stacking esperando otra orden');
+                createOption('repartidor_demorado_stacking_segunda', '1.1.11. Repartidor un poco demorado + Stacking segunda/tercera entrega');
+                createOption('sin_issue', '1.1.12. Sin issue');
+                createOption('sin_issue_stacking_esperando', '1.1.13. Sin issue + Con Stacking esperando otra orden');
+                createOption('sin_issue_stacking_segunda', '1.1.14. Sin issue + Con Stacking segunda/tercera entrega');
+                break;
+            case 'rider_dropoff':
+                createOption('tiempo_repartidor', '1.2.1. Nos está llevando más tiempo del habitual conseguir repartidor');
+                createOption('cambio_repartidor', '1.2.2. Tuvimos un cambio de repartidor');
+                createOption('demorado_recoger', '1.2.3. El repartidor se encuentra demorado para recoger el pedido');
+                createOption('local_demorado', '1.2.4. El local está demorado');
+                createOption('repartidor_poco_demorado', '1.2.5. El repartidor está un poco demorado');
+                createOption('sin_issue', '1.2.6. Sin issue');
+                break;
+        }
+    } else {
+        if (selectedValue === 'ontime' || selectedValue === 'delay') {
+            // Cambiar el color de fondo del select según la opción seleccionada
+            select.style.backgroundColor = selectedValue === 'ontime' ? 'green' : 'red';
+            
+            const ccr4Str = ccr4Map[currentCCR4];
+            const oneViewStr = oneViewMap[currentOneView] || '';
+            const issueKey = currentIssue; // Usar currentIssue directamente, ya que getIssueKey no está definido en el original
+            const key = `${ccr4Str}_${oneViewStr}_${issueKey}_${selectedValue}`;
+            let speech = speeches[key];
+            const horaEntrega = horaEntregaInput.value.trim();
+
+            console.log('Generated key:', key); // Depuración
+            console.log('Speech found:', speech); // Depuración
+            console.log('Hora ingresada:', horaEntrega); // Depuración
+
+            if (speech) {
+                // Validar el formato de la hora (HH:MM)
+                const horaRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+                const horaValida = horaEntrega && horaRegex.test(horaEntrega);
+                // Reemplazar XX:XX con la hora ingresada o mantener XX:XX si no es válida
+                const horaFinal = horaValida ? horaEntrega : 'XX:XX';
+                speech = speech.replace('XX:XX', horaFinal);
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(speech).then(() => {
+                        alert('¡Speech copiado al portapapeles!\n' + speech + (horaValida ? '' : '\n\nNota: Ingresa una hora válida (HH:MM) para reemplazar XX:XX.'));
+                    }).catch(err => {
+                        console.error('Error al copiar al portapapeles:', err);
+                        alert('No se pudo copiar al portapapeles. Copia manualmente:\n' + speech + (horaValida ? '' : '\n\nNota: Ingresa una hora válida (HH:MM) para reemplazar XX:XX.'));
+                    });
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = speech;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        document.execCommand('copy');
+                        alert('¡Speech copiado al portapapeles!\n' + speech + (horaValida ? '' : '\n\nNota: Ingresa una hora válida (HH:MM) para reemplazar XX:XX.'));
+                    } catch (err) {
+                        console.error('Error al copiar con execCommand:', err);
+                        alert('No se pudo copiar al portapapeles. Copia manualmente:\n' + speech + (horaValida ? '' : '\n\nNota: Ingresa una hora válida (HH:MM) para reemplazar XX:XX.'));
+                    }
+                    document.body.removeChild(textarea);
+                }
+            } else {
+                alert('No se encontró un speech para la combinación seleccionada. Clave: ' + key);
+                console.error('Clave no encontrada:', key);
+            }
+
+            // Resetear después de copiar
+            resetOptions();
+        } else {
+            currentIssue = selectedValue;
+            select.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.text = 'Selecciona una opción';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            select.appendChild(defaultOption);
+            label.textContent = 'Elige el CCR3';
+            select.style.backgroundColor = ''; // Resetear color de fondo
+
+            function createOption(value, text, backgroundColor) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.text = text;
+                if (backgroundColor) {
+                    option.style.backgroundColor = backgroundColor;
+                }
+                select.appendChild(option);
+            }
+
+            createOption('ontime', 'CCR3: PEDIDO DENTRO DEL TIEMPO DE ENTREGA', 'green');
+            createOption('delay', 'CCR3: QUEJA SOBRE RETRASO EXTREMO DEL PEDIDO', 'red');
+        }
+    }
+}
+
+  function resetOptions() {
+    currentCCR4 = '';
+    currentOneView = '';
+    currentIssue = '';
+    const selectElement = document.getElementById('estado_pedido');
+    const estadoLabel = document.getElementById('estado_label');
+    const horaEntregaInput = document.getElementById('hora_entrega');
+    
+    estadoLabel.textContent = 'Elige el CCR4 actual';
+    selectElement.innerHTML = `
+      <option value="" disabled selected>Selecciona una opción</option>
+      <option value="procesando">Estamos procesando tu pedido</option>
+      <option value="preparando">El local está preparando tu pedido / El local está terminando tu pedido</option>
+      <option value="repartidor_retirando">El repartidor llegó a retirar tu pedido</option>
+      <option value="en_camino">Tu pedido está en camino / Tu pedido está llegando</option>
+    `;
+    selectElement.style.backgroundColor = ''; // Resetear color de fondo
+    horaEntregaInput.value = ''; // Limpiar el campo de hora
+  }
+
+  function copyToClipboard(elementId) {
+    const text = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('¡Texto copiado al portapapeles!');
+    }).catch(err => {
+      alert('Error al copiar el texto. Por favor, intenta de nuevo.');
+      console.error('Error al copiar el texto: ', err);
+    });
+  }
+
+  function toggleEdit(elementId) {
+    const element = document.getElementById(elementId);
+    const button = element.closest('.relative').querySelector('button[onclick*="toggleEdit"]');
+    const isEditable = element.getAttribute('contenteditable') === 'true';
+    
+    if (isEditable) {
+      element.setAttribute('contenteditable', 'false');
+      element.classList.remove('border', 'border-gray-300', 'p-2', 'bg-white');
+      button.classList.remove('bg-green-600', 'hover:bg-green-700');
+      button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+      button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">';
+      localStorage.setItem(elementId, element.innerText); // Guardar cambios en localStorage
+      alert('Cambios guardados.');
+    } else {
+      element.setAttribute('contenteditable', 'true');
+      element.classList.add('border', 'border-gray-300', 'p-2', 'bg-white');
+      button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+      button.classList.add('bg-green-600', 'hover:bg-green-700');
+      button.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/84/84380.png" alt="Guardar plantilla" class="w-5 h-5">';
+      element.focus();
+    }
+  }
+
+  function addTemplate(section) {
+    const newTemplateText = prompt('Ingresa el nuevo texto del template:');
+    if (newTemplateText) {
+      const templateContainer = section.querySelector('.mt-4.space-y-4');
+      const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      const newTemplateDiv = document.createElement('div');
+      newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+      newTemplateDiv.innerHTML = `
+        <p id="${newTemplateId}" contenteditable="false">${newTemplateText}</p>
+        <div class="flex justify-between items-center mt-2">
+          <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+        </div>
+        <div class="absolute top-4 right-4 flex space-x-2">
+          <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+          </button>
+          <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+            <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+          </button>
+        </div>
+      `;
+      templateContainer.appendChild(newTemplateDiv);
+      localStorage.setItem(newTemplateId, newTemplateText); // Guardar en localStorage
+      alert('Nuevo template añadido.');
+    }
+  }
+
+  function deleteTemplate(elementId) {
+    const confirmDelete = confirm('¿Estás seguro de que deseas eliminar este template?');
+    if (confirmDelete) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.closest('.p-4.bg-gray-50').remove();
+        localStorage.removeItem(elementId); // Eliminar de localStorage
+        alert('Template eliminado.');
+      }
+    }
+  }
+
+  function addSection() {
+    const sectionTitle = prompt('Ingresa el título de la nueva sección:');
+    if (!sectionTitle || sectionTitle.trim() === '') {
+      alert('El título de la sección no puede estar vacío.');
+      return;
+    }
+    const existingSections = Array.from(document.querySelectorAll('section h2')).map(h2 => h2.textContent);
+    if (existingSections.includes(sectionTitle.trim())) {
+      alert('Ya existe una sección con ese título. Por favor, elige otro.');
+      return;
+    }
+    const main = document.querySelector('main');
+    const newSection = document.createElement('section');
+    newSection.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+    newSection.innerHTML = `
+      <h2 class="text-2xl font-semibold text-red-600 mb-4">${sectionTitle.trim()}</h2>
+      <p class="text-gray-700">Añade scripts para esta sección.</p>
+      <div class="mt-4 space-y-4"></div>
+      <div class="absolute top-6 right-6 flex space-x-2">
+        <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+          <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+        </button>
+      </div>
+    `;
+    main.appendChild(newSection);
+    alert('Sección añadida.');
+  }
+
+  function personalizeScripts() {
+    const workerEmail = localStorage.getItem('workerEmail') || 'Usuario no identificado';
+    const workerName = localStorage.getItem('workerName') || 'Usuario';
+    const initials = workerName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    document.getElementById('worker-email').textContent = `Sesión iniciada como: ${workerEmail}`;
+    document.getElementById('user-initials').textContent = initials;
+    const elements = document.querySelectorAll('.worker-name');
+    elements.forEach(element => {
+      element.textContent = workerName;
+    });
+
+    // Cargar plantillas guardadas desde localStorage
+    document.querySelectorAll('[id^="script-"]').forEach(element => {
+      const savedText = localStorage.getItem(element.id);
+      if (savedText) {
+        element.textContent = savedText;
+      }
+    });
+  }
+
+  function saveTemplatesToFile() {
+    const templates = [];
+    document.querySelectorAll('section').forEach(section => {
+      const sectionTitle = section.querySelector('h2').textContent;
+      section.querySelectorAll('[id^="script-"]').forEach(el => {
+        templates.push(`${sectionTitle}:\n${el.textContent.trim()}\n`);
+      });
+    });
+
+    const blob = new Blob([templates.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'templates.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('Templates guardados como templates.txt');
+  }
+
+  function loadTemplatesFromFile(event) {
+    if (!confirm('Cargar un nuevo archivo eliminará todas las plantillas actuales. ¿Continuar?')) return;
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const content = e.target.result;
+      const lines = content.split('\n').filter(line => line.trim());
+      if (!lines.some(line => line.endsWith(':'))) {
+        alert('Archivo inválido: debe contener al menos un título de sección.');
+        return;
+      }
+      let currentSection = null;
+
+      // Limpiar los templates existentes
+      document.querySelectorAll('section .mt-4.space-y-4').forEach(container => {
+        container.innerHTML = '';
+      });
+
+      // Cargar los nuevos templates
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.endsWith(':')) {
+          currentSection = line.slice(0, -1);
+          // Verificar si la sección ya existe
+          let sectionElement = Array.from(document.querySelectorAll('section')).find(
+            section => section.querySelector('h2').textContent === currentSection
+          );
+          // Si no existe, crear una nueva sección
+          if (!sectionElement) {
+            const main = document.querySelector('main');
+            sectionElement = document.createElement('section');
+            sectionElement.className = 'mb-8 bg-white p-6 rounded-lg shadow-md relative';
+            sectionElement.innerHTML = `
+              <h2 class="text-2xl font-semibold text-red-600 mb-4">${currentSection}</h2>
+              <p class="text-gray-700">Añade scripts para esta sección.</p>
+              <div class="mt-4 space-y-4"></div>
+              <div class="absolute top-6 right-6 flex space-x-2">
+                <button onclick="addTemplate(this.closest('section'))" class="bg-purple-600 text-white p-2 rounded hover:bg-purple-700 flex items-center">
+                  <img src="https://cdn-icons-png.flaticon.com/512/748/748113.png" alt="Agregar plantilla" class="w-5 h-5">
+                </button>
+              </div>
+            `;
+            main.appendChild(sectionElement);
+          }
+        } else if (line && currentSection) {
+          const sectionElement = Array.from(document.querySelectorAll('section')).find(
+            section => section.querySelector('h2').textContent === currentSection
+          );
+          if (sectionElement) {
+            const templateContainer = sectionElement.querySelector('.mt-4.space-y-4');
+            const newTemplateId = 'script-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            const newTemplateDiv = document.createElement('div');
+            newTemplateDiv.className = 'p-4 bg-gray-50 border-l-4 border-red-600 relative';
+            newTemplateDiv.innerHTML = `
+              <p id="${newTemplateId}" contenteditable="false">${line}</p>
+              <div class="flex justify-between items-center mt-2">
+                <button onclick="copyToClipboard('${newTemplateId}')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
+              </div>
+              <div class="absolute top-4 right-4 flex space-x-2">
+                <button onclick="toggleEdit('${newTemplateId}')" class="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 flex items-center">
+                  <img src="https://cdn-icons-png.flaticon.com/512/4898/4898440.png" alt="Editar plantilla" class="w-5 h-5">
+                </button>
+                <button onclick="deleteTemplate('${newTemplateId}')" class="bg-red-800 text-white p-2 rounded hover:bg-red-900 flex items-center">
+                  <img src="https://cdn-icons-png.flaticon.com/512/1214/1214428.png" alt="Eliminar plantilla" class="w-5 h-5">
+                </button>
+              </div>
+            `;
+            templateContainer.appendChild(newTemplateDiv);
+            localStorage.setItem(newTemplateId, line); // Guardar en localStorage
+          }
+        }
+      });
+      personalizeScripts(); // Actualizar nombres en las nuevas plantillas
+      alert('Templates cargados correctamente');
+    };
+    reader.readAsText(file);
+  }
+
+  document.getElementById('user-menu-button').addEventListener('click', function(e) {
+    const menu = document.getElementById('user-menu');
+    menu.classList.toggle('hidden');
+    e.stopPropagation();
+  });
+
+  document.getElementById('logout').addEventListener('click', function(e) {
+    e.preventDefault();
+    const confirmLogout = confirm("¿Estás seguro de que deseas cerrar sesión?");
+    if (confirmLogout) {
+      localStorage.clear();
+      alert("Sesión cerrada correctamente.");
+      window.location.href = 'index.html';
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('user-menu');
+    if (!menu.contains(e.target) && e.target !== document.getElementById('user-menu-button')) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  window.onload = function() {
+    // Verificar si hay una sesión activa
+    if (!localStorage.getItem('workerEmail')) {
+      alert('No has iniciado sesión. Serás redirigido al login.');
+      window.location.href = 'index.html';
+      return;
+    }
+    personalizeScripts();
+  };
+</script>
+</body>
+</html>
