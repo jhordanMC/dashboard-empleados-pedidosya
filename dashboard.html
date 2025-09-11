@@ -946,14 +946,23 @@
   }
 
   function copyToClipboard(elementId) {
-    const text = document.getElementById(elementId).innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      alert('¡Texto copiado al portapapeles!');
-    }).catch(err => {
-      alert('Error al copiar el texto. Por favor, intenta de nuevo.');
-      console.error('Error al copiar el texto: ', err);
-    });
-  }
+  const text = document.getElementById(elementId).innerText;
+  const button = document.querySelector(`button[onclick="copyToClipboard('${elementId}')"]`);
+  navigator.clipboard.writeText(text).then(() => {
+    // Cambiar el color del botón a celeste azul
+    button.classList.remove('bg-red-600', 'hover:bg-red-700');
+    button.classList.add('bg-blue-300', 'hover:bg-blue-400');
+    // Volver al color original después de 1 segundo
+    setTimeout(() => {
+      button.classList.remove('bg-blue-300', 'hover:bg-blue-400');
+      button.classList.add('bg-red-600', 'hover:bg-red-700');
+    }, 1000);
+  }).catch(err => {
+    // En caso de error, mostramos un mensaje de alerta
+    alert('Error al copiar el texto. Por favor, intenta de nuevo.');
+    console.error('Error al copiar el texto: ', err);
+  });
+}
 
   function toggleEdit(elementId) {
     const element = document.getElementById(elementId);
