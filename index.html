@@ -220,7 +220,7 @@
                 <img src="ciro.jpg" alt="Ciro">
                 <img src="alba.jpeg" alt="Alba">
             </div>
-            <p>Acceso Seguro</p>
+            <p>CIRO</p>
             <p>Selecciona tu rol</p>
             <div class="role-buttons">
                 <div class="role-btn-container">
@@ -274,31 +274,22 @@
         }
 
         const validEmails = [
-            "jhordan.medina_apx.ext@pedidosya.com",
-            "sergio.ccopa_apx.ext@pedidosya.com",
-            "maryuri.ruiz_apx.ext@pedidosya.com",
-            "jazmin.huanca_apx.ext@pedidosya.com",
-            "aurelio.castro_apx.ext@pedidosya.com",
-            "veronica.allauca_apx.ext@pedidosya.com",
-            "carlos.lobe_apx.ext@pedidosya.com",
-            "alondra.vasquez_apx.ext@pedidosya.com",
-            "juliocesar.rivera_apx.ext@pedidosya.com",
-            "claire.cerron_apx.ext@pedidosya.com",
-            "miguel.tito_apx.ext@pedidosya.com",
-            "sergio.mondalgo_apx.ext@pedidosya.com",
-            "ruth.sumaran_apx.ext@pedidosya.com",
-            "marcia.sanchez_apx.ext@pedidosya.com",
-            "angel.castillo_apx.ext@pedidosya.com",
-            "raphael.torres_apx.ext@pedidosya.com",
-            "maria.galindo_apx.ext@pedidosya.com",
-            "erly.cubas_apx.ext@pedidosya.com",
-            "ruth.sarmiento_apx.ext@pedidosya.com",
-            "emily.garcia_apx.ext@pedidosya.com",
-            "gilber.cosme_apx.ext@pedidosya.com",
-            "marcia.sanchez_apx.ext@pedidosya.com",
-            "daniela.alarcon_apx.ext@pedidosya.com",
-            "carmen.gallego_apx.ext@pedidosya.com",
-            "ana.dongo_apx.ext@pedidosya.com", "fiorella.vera_apx.ext@pedidosya.com", "natalia.echevarria_apx.ext@pedidosya.com"
+            "jhordan.medina@ciro.com",
+            "sergio.ccopa@ciro.com",
+            "jazmin.huanca@ciro.com",
+            "veronica.allauca@ciro.com",
+            "claire.cerron@ciro.com",
+            "miguel.tito@ciro.com",
+            "sergio.mondalgo@ciro.com",
+            "ruth.sumaran@ciro.com",
+            "angel.castillo@ciro.com",
+            "raphael.torres@ciro.com",
+            "ruth.sumaran@ciro.com",
+            "emily.garcia@ciro.com",
+            "gilber.cosme@ciro.com",
+            "daniela.alarcon@ciro.com",
+            "carmen.gallego@ciro.com",
+
         ];
 
         function validateLogin() {
@@ -308,9 +299,9 @@
             const role = localStorage.getItem('role');
             let redirectPage = "dashboard.html";
 
-            if (role === 'admin' && email === "jadmin@pedidosya.com" && password === "admin123") {
+            if (role === 'admin' && email === "jadmin@pedidosya.com" && password === "652MedJhor256") {
                 errorMessage.textContent = "¡Inicio de sesión exitoso, Administrador!";
-            } else if (role === 'user' && validEmails.includes(email) && password === "asesor123") {
+            } else if (role === 'user' && validEmails.includes(email) && password === "Pantreon2569+") {
                 errorMessage.textContent = "¡Inicio de sesión exitoso!";
             } else {
                 errorMessage.textContent = "Correo, contraseña o rol incorrectos.";
@@ -331,5 +322,4 @@
         }
     </script>
 </body>
-
 </html>
