@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atención al Cliente - PedidosYa</title>
+  <title>Atención al Cliente por chat</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Favicon -->
   <link rel="icon" type="image/jpeg" href="ciro.jpg">
@@ -13,8 +13,8 @@
   <header class="bg-red-600 text-white py-6 flex items-center justify-between">
     <div class="container mx-auto flex items-center justify-center">
       <div class="text-center">
-        <h1 class="text-3xl font-bold mb-2">Atención al Cliente - PedidosYa</h1>
-        <p class="mb-2">Scripts y guías para consultas y reclamos frecuentes</p>
+        <h1 class="text-3xl font-bold mb-2">Atención al Cliente por chat</h1>
+        <p class="mb-2">Propuestas y guías para consultas y reclamos frecuentes // Recuerda que no es una herramienta oficial, y no reemplaza el criterio que puedas presentar para personalizar con tu cliente.</p>
         <p class="text-sm" id="worker-email">Sesión iniciada como: Cargando...</p>
       </div>
     </div>
@@ -27,6 +27,8 @@
       </div>
     </div>
   </header>
+
+
 
   <main class="container mx-auto py-8">
     <!-- Sección intermedia para los botones -->
@@ -148,7 +150,7 @@
       <p class="text-gray-700">Para gestionar cancelaciones de manera clara y empática, usa este script:</p>
       <div class="mt-4 space-y-4">
         <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
-          <p id="script-cancelaciones" contenteditable="false">Lamento mucho las molestias, [Nombre del Cliente]. Entiendo que necesitas cancelar tu pedido. Voy a ayudarte con eso. Por favor, confírmame el número de pedido o el restaurante para procesar la cancelación lo antes posible. Si hay algún reembolso, te informaré los detalles en un momento.</p>
+          <p id="script-cancelaciones" contenteditable="false">Siento mucho las molestias, [Nombre del Cliente]. Entiendo que necesitas cancelar tu pedido. Voy a ayudarte con eso. Por favor, confírmame el número de pedido o el restaurante para procesar la cancelación lo antes posible. Si hay algún reembolso, te informaré los detalles en un momento.</p>
           <div class="flex justify-between items-center mt-2">
             <button onclick="copyToClipboard('script-cancelaciones')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
           </div>
@@ -283,7 +285,7 @@
       <p class="text-gray-700">Para manejar casos donde el cliente no quedó satisfecho, invitándolo a dejar feedback:</p>
       <div class="mt-4 space-y-4">
         <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
-          <p id="script-encuesta-insatisfecho" contenteditable="false">Lamento mucho que no hayamos podido resolver tu consulta como esperabas, [Nombre del Cliente]. Tu opinión es muy importante para nosotros. ¿Podrías dedicar un momento a completar una breve encuesta? Esto nos ayudará a mejorar nuestro servicio. Gracias por tu tiempo y paciencia.</p>
+          <p id="script-encuesta-insatisfecho" contenteditable="false">Siento mucho que no hayamos podido resolver tu consulta como esperabas, [Nombre del Cliente]. Tu opinión es muy importante para nosotros. ¿Podrías dedicar un momento a completar una breve encuesta? Esto nos ayudará a mejorar nuestro servicio. Gracias por tu tiempo y paciencia.</p>
           <div class="flex justify-between items-center mt-2">
             <button onclick="copyToClipboard('script-encuesta-insatisfecho')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
           </div>
@@ -351,7 +353,7 @@
           </div>
         </div>
         <div class="p-4 bg-gray-50 border-l-4 border-red-600 relative">
-          <p id="script-producto" contenteditable="false">Lamento mucho esta situación, [Nombre del Cliente]. Por favor, dime qué producto falta o está incorrecto, y trabajaré con el restaurante para solucionarlo de inmediato, ya sea con un reemplazo o un reembolso.</p>
+          <p id="script-producto" contenteditable="false">Siento mucho esta situación, [Nombre del Cliente]. Por favor, dime qué producto falta o está incorrecto, y trabajaré con el restaurante para solucionarlo de inmediato, ya sea con un reemplazo o un reembolso.</p>
           <div class="flex justify-between items-center mt-2">
             <button onclick="copyToClipboard('script-producto')" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Copiar</button>
           </div>
@@ -389,7 +391,7 @@
 
   <footer class="bg-gray-800 text-white py-4">
     <div class="container mx-auto text-center">
-      <p>&copy; 2025 PedidosYa - Atención al Cliente</p>
+      <p>&copy; 2025 Ciro.dev</p>
     </div>
   </footer>
 
